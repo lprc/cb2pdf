@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+
+require_relative './../lib/cb2pdf'
+require 'fileutils'
+
+if ARGV.empty?
+  puts "usage: cb2pdf [-o output/dir] [--7z-output] [-7z-path path/to/7z.exe] file1.cbr [C:\\comics\\**\\*.cbz file3.cb7 ...]"
+else
+  files = []
+  outdir = "."
+  seven_zip_output = false
+  seven_zip_path = nil
+
+  skip_next = false
+  for i in 0..ARGV.size
+    if skip_next
+      skip_next = false
+      next
+    end
+
+    arg = ARGV[i]
+    case arg
+      when '-o'
+        outdir = ARGV[i + 1]
+        skip_next = true
+      when '--7z-output'
+        seven_zip_output = true
+      when '-7z-path'
+        seven_zip_path = ARGV[i + 1]
+        skip_next = true
+      when nil
+        next
+      else
+        a = arg.gsub(/\\/, '/')
+        if a.include? '*' or a.include? '**'
+          Dir.glob(a){ |file|
+            files << file
+          }
+        else
+          files << a
+        end
+    end
+  end
+
+  if files.empty?
+    puts "no files given"
+  else
+    FileUtils.mkdir_p outdir unless File.directory?(outdir)
+
+    CB2PDF::Converter.console_output = true
+    CB2PDF::Converter.seven_zip_output = seven_zip_output
+    CB2PDF::Converter.seven_zip_path = seven_zip_path unless seven_zip_path.nil?
+
+    files.each_with_index { |file, i|
+      puts "\n[#{i + 1} from #{files.size}]"
+      CB2PDF::Converter.convert(file, outdir)
+    }
+  end
+end
