@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.executables  << "cb2pdf"
   s.require_paths = ['lib']
   s.homepage      = 'http://rubygems.org/gems/cb2pdf'
-  s.license       = 'MIT'
+  s.license       = 'GPL-3.0+'
 
   s.add_development_dependency 'minitest', '~> 5'
   s.add_runtime_dependency 'prawn', '~> 2'
